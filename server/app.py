@@ -81,6 +81,26 @@ def create_workout():
             "error": str(e)
         }), 400
 
+@app.route("/workouts/<int:id>", methods=["DELETE"])
+def delete_workout(id):
+    """
+    Delete a workout by its ID.
+    """
+
+    workout = db.session.get(Workout, id)
+
+    if workout is None:
+        return jsonify({
+            "error": "Workout not found."
+        }), 404
+
+    db.session.delete(workout)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Workout deleted successfully."
+    }), 200
+
 if __name__ == "__main__":
     app.run(
         port = 5555,
