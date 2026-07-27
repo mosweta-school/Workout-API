@@ -117,7 +117,22 @@ def get_exercises():
     return jsonify(
         exercises_schema.dump(exercises)
     ), 200
+@app.route("/exercises/<int:id>", methods=["GET"])
+def get_exercise(id):
+    """
+    Return a single exercise by its ID.
+    """
 
+    exercise = db.session.get(Exercise, id)
+
+    if exercise is None:
+        return jsonify({
+            "error": "Exercise not found."
+        }), 404
+
+    return jsonify(
+        exercise_schema.dump(exercise)
+    ), 200
 if __name__ == "__main__":
     app.run(
         port = 5555,
