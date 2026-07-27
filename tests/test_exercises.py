@@ -39,3 +39,40 @@ def test_get_invalid_exercise(client):
     assert response.status_code == 404
 
     assert response.get_json()["error"] == "Exercise not found."
+
+def test_create_exercise(client):
+
+    payload = {
+        "name": "Bench Press",
+        "category": "Strength",
+        "equipment_needed": True
+    }
+
+    response = client.post(
+        "/exercises",
+        json=payload
+    )
+
+    assert response.status_code == 201
+
+    exercise = response.get_json()
+
+    assert exercise["name"] == "Bench Press"
+    assert exercise["category"] == "Strength"
+    assert exercise["equipment_needed"] is True
+
+
+def test_create_invalid_exercise(client):
+
+    payload = {
+        "name": "Romanian Deadlift",
+        "category": "Swimming",
+        "equipment_needed": True
+    }
+
+    response = client.post(
+        "/exercises",
+        json=payload
+    )
+
+    assert response.status_code == 400

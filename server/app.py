@@ -7,7 +7,7 @@ from .schemas import (
     exercise_schema,
     exercises_schema,
 )
-
+from sqlalchemy.exc import IntegrityError
 app = Flask(__name__)
 
 from pathlib import Path
@@ -133,6 +133,40 @@ def get_exercise(id):
     return jsonify(
         exercise_schema.dump(exercise)
     ), 200
+
+@app.route("/exercises", methods=["POST"])
+def create_exercise():
+    """
+    Create a new exercise.
+    """
+
+    data = request.get_json()
+
+    try:
+        validated_data = exercise_schema.load(data)
+
+        exercise = Exercise(**validated_data)
+
+        db.session.add(exercise)
+        db.session.commit()
+
+        return jsonify(
+            exercise_schema.dump(exercise)
+        ), 201
+
+    except IntegrityError:
+        db.session.rollback()
+
+        return jsonify({
+            "error": "An exercise with that name already exists."
+        }), 400
+
+    except Exception as e:
+        db.session.rollback()
+
+    return jsonify({
+        "error": str(e)
+    }), 400
 if __name__ == "__main__":
     app.run(
         port = 5555,
