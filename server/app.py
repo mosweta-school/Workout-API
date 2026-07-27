@@ -1,7 +1,12 @@
 from flask import Flask, jsonify, request
 from flask_migrate import Migrate
-from .models import db, Workout
-from .schemas import workouts_schema, workout_schema
+from .models import db, Workout, Exercise
+from .schemas import (
+    workout_schema,
+    workouts_schema,
+    exercise_schema,
+    exercises_schema,
+)
 
 app = Flask(__name__)
 
@@ -100,6 +105,18 @@ def delete_workout(id):
     return jsonify({
         "message": "Workout deleted successfully."
     }), 200
+
+@app.route("/exercises", methods=["GET"])
+def get_exercises():
+    """
+    Return all exercises.
+    """
+
+    exercises = Exercise.query.all()
+
+    return jsonify(
+        exercises_schema.dump(exercises)
+    ), 200
 
 if __name__ == "__main__":
     app.run(
