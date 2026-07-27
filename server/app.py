@@ -1,7 +1,7 @@
 from flask import Flask, jsonify
 from flask_migrate import Migrate
 from .models import db, Workout
-from .schemas import workouts_schema
+from .schemas import workouts_schema, workout_schema
 
 app = Flask(__name__)
 
@@ -40,6 +40,21 @@ def get_workouts():
     result = workouts_schema.dump(workouts)
 
     return jsonify(result), 200
+
+@app.get("/workouts/<int:id>")
+def get_workout(id):
+    """
+    Return a single workout by its ID.
+    """
+
+    workout = Workout.query.get(id)
+
+    if workout is None:
+        return jsonify({
+            "error": "Workout not found."
+        }), 404
+
+    return jsonify(workout_schema.dump(workout)), 200
 
 if __name__ == "__main__":
     app.run(
