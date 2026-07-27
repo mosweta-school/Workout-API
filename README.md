@@ -210,7 +210,7 @@ Exercise
 ## 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone git@github.com:mosweta-school/Workout-API.git
 
 cd workout-api
 ```
@@ -231,11 +231,6 @@ Activate:
 source venv/bin/activate
 ```
 
-### Windows
-
-```bash
-venv\Scripts\activate
-```
 
 ---
 
@@ -521,6 +516,27 @@ Example:
 ```
 
 ---
+
+## Screenshots
+### Tests
+<img width="1243" height="291" alt="image" src="https://github.com/user-attachments/assets/fa9d5065-be94-4e82-b68b-d700638e9c17" />
+
+### Postman testing
+<img width="1075" height="951" alt="image" src="https://github.com/user-attachments/assets/84b25f3a-d802-49e7-a62e-6b0ee4109d80" />
+
+# GitHub topics
+
+```
+python
+flask
+rest-api
+sqlalchemy
+sqlite
+pytest
+backend
+api
+```
+
 
 # Future Improvements
 
