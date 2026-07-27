@@ -43,7 +43,7 @@ def test_get_invalid_exercise(client):
 def test_create_exercise(client):
 
     payload = {
-        "name": "Bench Press 2",
+        "name": "Bench Press 8",
         "category": "Strength",
         "equipment_needed": True
     }

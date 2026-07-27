@@ -1,13 +1,15 @@
 from flask import Flask, jsonify, request
 from flask_migrate import Migrate
-from .models import db, Workout, Exercise
+from .models import db, Workout, Exercise, WorkoutExercise
 from .schemas import (
     workout_schema,
     workouts_schema,
     exercise_schema,
     exercises_schema,
+    workout_exercise_schema,
 )
 from sqlalchemy.exc import IntegrityError
+from marshmallow import ValidationError
 app = Flask(__name__)
 
 from pathlib import Path
@@ -46,13 +48,13 @@ def get_workouts():
 
     return jsonify(result), 200
 
-@app.get("/workouts/<int:id>")
+@app.route("/workouts/<int:id>", methods=["GET"])
 def get_workout(id):
     """
     Return a single workout by its ID.
     """
 
-    workout = Workout.query.get(id)
+    workout = db.session.get(Workout, id)
 
     if workout is None:
         return jsonify({
@@ -78,7 +80,10 @@ def create_workout():
         db.session.commit()
 
         return jsonify(workout_schema.dump(workout)), 201
-
+    except ValidationError as err:
+        return jsonify({
+            "errors": err.messages
+        }), 400
     except Exception as e:
         db.session.rollback()
 
@@ -187,6 +192,57 @@ def delete_exercise(id):
     return jsonify({
         "message": "Exercise deleted successfully."
     }), 200
+
+@app.route("/workouts/<int:workout_id>/exercises/<int:exercise_id>/workout_exercises", methods=["POST"])
+def add_exercise_to_workout(workout_id, exercise_id):
+    """
+    Add an exercise to a workout.
+    """
+
+    workout = db.session.get(Workout, workout_id)
+
+    if workout is None:
+        return jsonify({
+            "error": "Workout not found."
+        }), 404
+
+    exercise = db.session.get(Exercise, exercise_id)
+
+    if exercise is None:
+        return jsonify({
+            "error": "Exercise not found."
+        }), 404
+
+    data = request.get_json()
+
+    try:
+        validated_data = workout_exercise_schema.load(data)
+
+        validated_data["workout_id"] = workout_id
+        validated_data["exercise_id"] = exercise_id
+
+        workout_exercise = WorkoutExercise(**validated_data)
+
+        db.session.add(workout_exercise)
+        db.session.commit()
+
+        return jsonify(
+            workout_exercise_schema.dump(workout_exercise)
+        ), 201
+
+    except IntegrityError:
+        db.session.rollback()
+
+        return jsonify({
+            "error": "Exercise already exists in this workout."
+        }), 400
+
+    except Exception as e:
+        db.session.rollback()
+
+        return jsonify({
+            "error": str(e)
+        }), 400
 if __name__ == "__main__":
     app.run(
         port = 5555,
