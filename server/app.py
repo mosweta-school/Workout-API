@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_migrate import Migrate
 from .models import db, Workout
 from .schemas import workouts_schema, workout_schema
@@ -55,6 +55,31 @@ def get_workout(id):
         }), 404
 
     return jsonify(workout_schema.dump(workout)), 200
+
+@app.route("/workouts", methods=["POST"])
+def create_workout():
+    """
+    Create a new workout.
+    """
+
+    data = request.get_json()
+
+    try:
+        validated_data = workout_schema.load(data)
+
+        workout = Workout(**validated_data)
+
+        db.session.add(workout)
+        db.session.commit()
+
+        return jsonify(workout_schema.dump(workout)), 201
+
+    except Exception as e:
+        db.session.rollback()
+
+        return jsonify({
+            "error": str(e)
+        }), 400
 
 if __name__ == "__main__":
     app.run(
